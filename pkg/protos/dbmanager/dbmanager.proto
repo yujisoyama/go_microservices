@@ -1,0 +1,24 @@
+syntax = "proto3";
+package dbmanager;
+option go_package = "github.com/yujisoyama/go_microservices/pkg/protos/dbmanager";
+
+import "pkg/protos/user/user.proto";
+
+service DbManager {
+  rpc Ping(PingRequest) returns (PingResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}
+
+message PingRequest {}
+message PingResponse {}
+
+message RequestHeader {
+  string api_key = 1;
+}
+
+message CreateUserRequest {
+  RequestHeader header = 1;
+  user.User user = 2;
+}
+
+message CreateUserResponse {}

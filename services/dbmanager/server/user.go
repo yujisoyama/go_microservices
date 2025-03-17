@@ -7,6 +7,6 @@ import (
 )
 
 func (dbM *DbManager) CreateUser(ctx context.Context, in *dbmanager.CreateUserRequest) (*dbmanager.CreateUserResponse, error) {
-	dbM.log.Info("Create user")
+	dbM.log.Info("CreateUser request")
 	return &dbmanager.CreateUserResponse{}, nil
 }

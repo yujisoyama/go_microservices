@@ -12,13 +12,8 @@ service DbManager {
 message PingRequest {}
 message PingResponse {}
 
-message RequestHeader {
-  string api_key = 1;
-}
-
 message CreateUserRequest {
-  RequestHeader header = 1;
-  user.User user = 2;
+  user.User user = 1;
 }
 
 message CreateUserResponse {}

@@ -8,5 +8,8 @@ import (
 
 func main() {
 	app := server.NewDbManager()
-	app.Run(context.Background())
+	err := app.Run(context.Background())
+	if err != nil {
+		panic(err)
+	}
 }

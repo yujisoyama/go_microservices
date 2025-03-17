@@ -8,43 +8,52 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yujisoyama/go_microservices/pkg/logger"
 	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
-	"github.com/yujisoyama/go_microservices/pkg/utils"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type DbManager struct {
 	dbmanager.UnimplementedDbManagerServer
-	port string
-	apikey string
-	log *logrus.Logger
+	log     *logrus.Logger
+	configs *DbManagerConfigs
 }
 
 func NewDbManager() *DbManager {
 	return &DbManager{
-		log: logger.NewLogger(),
+		log:     logger.NewLogger(),
+		configs: &DbManagerConfigs{},
 	}
 }
 
-func (dbM *DbManager) SetConfigs() {
-	dbM.port = utils.GetEnv("PORT")
-	dbM.apikey = utils.GetEnv("API_KEY")
-}
+func (dbm *DbManager) Run(ctx context.Context) error {
+	dbm.SetConfigs()
+	dbm.log.Info("Start grpc dbmanager in port: ", dbm.configs.port)
 
-func (dbM *DbManager) Run(ctx context.Context) error {
-	dbM.SetConfigs()
-	dbM.log.Info("Start grpc dbmanager in port: ", dbM.port)
+	clientOptions := options.Client().ApplyURI(dbm.DbConnectString())
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return fmt.Errorf("failed to connect to MongoDB: %v", err)
+	}
 
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to ping MongoDB: %v", err)
+	}
+
+	dbm.log.Info("Connected to MongoDB!")
+	
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
-	dbmanager.RegisterDbManagerServer(grpcServer, dbM)
+	dbmanager.RegisterDbManagerServer(grpcServer, dbm)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", dbM.port))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", dbm.configs.port))
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
 
-	dbM.log.Infof("Ready to serve requests!")
+	dbm.log.Infof("Ready to serve requests!")
 	if err = grpcServer.Serve(listener); err != nil {
 		return fmt.Errorf("failed to serve: %v", err)
 	}

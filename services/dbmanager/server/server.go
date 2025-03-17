@@ -17,8 +17,9 @@ import (
 
 type DbManager struct {
 	dbmanager.UnimplementedDbManagerServer
-	log     *logrus.Logger
-	configs *DbManagerConfigs
+	log      *logrus.Logger
+	configs  *DbManagerConfigs
+	dbClient *mongo.Client
 }
 
 func NewDbManager() *DbManager {
@@ -33,12 +34,15 @@ func (dbm *DbManager) Run(ctx context.Context) error {
 	dbm.log.Info("Start grpc dbmanager in port: ", dbm.configs.port)
 
 	clientOptions := options.Client().ApplyURI(dbm.DbConnectString())
-	client, err := mongo.Connect(ctx, clientOptions)
+
+	var err error
+	dbm.dbClient, err = mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
+	defer dbm.dbClient.Disconnect(ctx)
 
-	err = client.Ping(ctx, nil)
+	err = dbm.dbClient.Ping(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to ping MongoDB: %v", err)
 	}

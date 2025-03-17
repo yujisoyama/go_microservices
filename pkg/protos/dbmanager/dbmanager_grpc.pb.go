@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DbManagerClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	UpsertUser(ctx context.Context, in *UpsertUserRequest, opts ...grpc.CallOption) (*UpsertUserResponse, error)
 }
 
 type dbManagerClient struct {
@@ -38,9 +38,9 @@ func (c *dbManagerClient) Ping(ctx context.Context, in *PingRequest, opts ...grp
 	return out, nil
 }
 
-func (c *dbManagerClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
-	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, "/dbmanager.DbManager/CreateUser", in, out, opts...)
+func (c *dbManagerClient) UpsertUser(ctx context.Context, in *UpsertUserRequest, opts ...grpc.CallOption) (*UpsertUserResponse, error) {
+	out := new(UpsertUserResponse)
+	err := c.cc.Invoke(ctx, "/dbmanager.DbManager/UpsertUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *dbManagerClient) CreateUser(ctx context.Context, in *CreateUserRequest,
 // for forward compatibility
 type DbManagerServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	UpsertUser(context.Context, *UpsertUserRequest) (*UpsertUserResponse, error)
 	mustEmbedUnimplementedDbManagerServer()
 }
 
@@ -63,8 +63,8 @@ type UnimplementedDbManagerServer struct {
 func (UnimplementedDbManagerServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedDbManagerServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+func (UnimplementedDbManagerServer) UpsertUser(context.Context, *UpsertUserRequest) (*UpsertUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertUser not implemented")
 }
 func (UnimplementedDbManagerServer) mustEmbedUnimplementedDbManagerServer() {}
 
@@ -97,20 +97,20 @@ func _DbManager_Ping_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DbManager_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateUserRequest)
+func _DbManager_UpsertUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DbManagerServer).CreateUser(ctx, in)
+		return srv.(DbManagerServer).UpsertUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/dbmanager.DbManager/CreateUser",
+		FullMethod: "/dbmanager.DbManager/UpsertUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DbManagerServer).CreateUser(ctx, req.(*CreateUserRequest))
+		return srv.(DbManagerServer).UpsertUser(ctx, req.(*UpsertUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -124,8 +124,8 @@ var _DbManager_serviceDesc = grpc.ServiceDesc{
 			Handler:    _DbManager_Ping_Handler,
 		},
 		{
-			MethodName: "CreateUser",
-			Handler:    _DbManager_CreateUser_Handler,
+			MethodName: "UpsertUser",
+			Handler:    _DbManager_UpsertUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

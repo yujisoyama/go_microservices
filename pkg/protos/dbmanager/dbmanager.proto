@@ -6,14 +6,16 @@ import "pkg/protos/user/user.proto";
 
 service DbManager {
   rpc Ping(PingRequest) returns (PingResponse);
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpsertUser(UpsertUserRequest) returns (UpsertUserResponse);
 }
 
 message PingRequest {}
 message PingResponse {}
 
-message CreateUserRequest {
+message UpsertUserRequest {
   user.User user = 1;
 }
 
-message CreateUserResponse {}
+message UpsertUserResponse {
+  user.User user = 1;
+}

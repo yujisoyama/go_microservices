@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"time"
 
 	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
 	"github.com/yujisoyama/go_microservices/pkg/protos/user"
 	"github.com/yujisoyama/go_microservices/pkg/utils"
+	"github.com/yujisoyama/go_microservices/services/dbmanager/internal/entity"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,13 +19,15 @@ func (dbm *DbManager) UpsertUser(ctx context.Context, req *dbmanager.UpsertUserR
 
 	resp := &dbmanager.UpsertUserResponse{}
 
-	var usr bson.M
-	err := collection.FindOne(ctx, bson.M{"email": req.User.Email}).Decode(&usr)
+	var usr entity.UserEntity
+	err := collection.FindOne(ctx, bson.M{"email": req.Email}).Decode(&usr)
 	if err == mongo.ErrNoDocuments {
 		dbm.log.Info("User not found, inserting new user")
-		newUser := &user.User{
-			Name:  req.User.Name,
-			Email: req.User.Email,
+		newUser := &entity.UserEntity{
+			Name:      req.Name,
+			Email:     req.Email,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		res, err := collection.InsertOne(ctx, newUser)
@@ -36,32 +40,39 @@ func (dbm *DbManager) UpsertUser(ctx context.Context, req *dbmanager.UpsertUserR
 			return nil, utils.GrpcException(codes.Internal, "Error in converting ID of insert user", err)
 		}
 
-		resp.User = newUser
+		resp.User = &user.User{
+			Id:        oId.Hex(),
+			Name:      newUser.Name,
+			Email:     newUser.Email,
+			CreatedAt: newUser.CreatedAt.UTC().Format(time.RFC3339),
+			UpdatedAt: newUser.UpdatedAt.UTC().Format(time.RFC3339),
+		}
 		resp.User.Id = oId.Hex()
 	} else {
-		dbm.log.Infof("User with email %s founded. Upserting data", req.User.Email)
+		dbm.log.Infof("User with email %s founded. Upserting data", req.Email)
 
-		oId, ok := usr["_id"].(primitive.ObjectID)
-		if !ok {
-			return nil, utils.GrpcException(codes.Internal, "Error in getting ID of user", err)
+		upUser := &entity.UserEntity{
+			Name:      req.Name,
+			Email:     req.Email,
+			CreatedAt: usr.CreatedAt,
+			UpdatedAt: time.Now(),
 		}
 
 		update := bson.M{
-			"$set": bson.M{
-				"name":  req.User.Name,
-				"email": req.User.Email,
-			},
-		}
+			"$set": upUser,
+	}
 
-		_, err = collection.UpdateOne(ctx, bson.M{"_id": oId}, update)
+		_, err = collection.UpdateOne(ctx, bson.M{"_id": usr.ID}, update)
 		if err != nil {
 			return nil, utils.GrpcException(codes.Internal, "Error in updating user", err)
 		}
 
 		resp.User = &user.User{
-			Id:    oId.Hex(),
-			Name:  req.User.Name,
-			Email: req.User.Email,
+			Id:    usr.ID.Hex(),
+			Name:  req.Name,
+			Email: req.Email,
+			CreatedAt: usr.CreatedAt.UTC().Format(time.RFC3339),
+			UpdatedAt: upUser.UpdatedAt.UTC().Format(time.RFC3339),
 		}
 	}
 

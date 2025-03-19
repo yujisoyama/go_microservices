@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func GrpcException(code codes.Code, customMsg string, err error) error {
-	return status.Errorf(codes.Internal, customMsg, err)
+func GrpcException(code codes.Code, customMsg string) error {
+	return status.Error(codes.Internal, customMsg)
 }
 
 func RestException(c *fiber.Ctx, code int, customMsg string, err error) error {

@@ -2,10 +2,14 @@ package logger
 
 import "github.com/sirupsen/logrus"
 
-func NewLogger() *logrus.Logger {
+type Logger struct {
+	*logrus.Logger
+}
+
+func NewLogger() *Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
-	return logger
+	return &Logger{logger}
 }

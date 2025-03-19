@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
 
-	"github.com/sirupsen/logrus"
 	"github.com/yujisoyama/go_microservices/pkg/logger"
 	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
 	"github.com/yujisoyama/go_microservices/services/dbmanager/internal/interceptor"
@@ -17,7 +18,7 @@ import (
 
 type DbManager struct {
 	dbmanager.UnimplementedDbManagerServer
-	log      *logrus.Logger
+	log      *logger.Logger
 	configs  *DbManagerConfigs
 	dbClient *mongo.Client
 }
@@ -63,10 +64,22 @@ func (dbm *DbManager) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
 
+	go func() {
+		if err := grpcServer.Serve(listener); err != nil {
+			dbm.log.Fatalf("Failed to serve: %v", err)
+		}
+	}()
 	dbm.log.Infof("Ready to serve requests!")
-	if err = grpcServer.Serve(listener); err != nil {
-		return fmt.Errorf("failed to serve: %v", err)
-	}
 
+	// Right way to stop the server using a SHUTDOWN HOOK
+	// Create a channel to receive OS signals
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt)
+	<-c
+
+	dbm.log.Info("Stopping the server...")
+	grpcServer.Stop()
+	listener.Close()
+	fmt.Println("Done.")
 	return nil
 }

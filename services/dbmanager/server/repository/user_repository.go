@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
-	userpb "github.com/yujisoyama/go_microservices/pkg/protos/user"
+	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"
+	userpb "github.com/yujisoyama/go_microservices/pkg/pb/user"
 	"github.com/yujisoyama/go_microservices/services/dbmanager/internal/entity"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

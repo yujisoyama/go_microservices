@@ -3,7 +3,7 @@ package validation
 import (
 	"errors"
 
-	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
+	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"
 )
 
 func ValidateUpsertUserRequest(req *dbmanager.UpsertUserRequest) error {

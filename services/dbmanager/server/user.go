@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
+	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"
 	"github.com/yujisoyama/go_microservices/pkg/utils"
 	"github.com/yujisoyama/go_microservices/services/dbmanager/internal/validation"
 	"github.com/yujisoyama/go_microservices/services/dbmanager/server/handler"

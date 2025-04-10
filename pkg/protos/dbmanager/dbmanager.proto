@@ -1,6 +1,6 @@
 syntax = "proto3";
 package dbmanager;
-option go_package = "github.com/yujisoyama/go_microservices/pkg/protos/dbmanager";
+option go_package = "github.com/yujisoyama/go_microservices/pkg/pb/dbmanager";
 
 import "pkg/protos/user/user.proto";
 

@@ -1,6 +1,6 @@
 syntax = "proto3";
 package user;
-option go_package = "github.com/yujisoyama/go_microservices/pkg/protos/user";
+option go_package = "github.com/yujisoyama/go_microservices/pkg/pb/user";
 
 message User {
   string id = 1;

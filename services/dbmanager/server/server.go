@@ -8,7 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/yujisoyama/go_microservices/pkg/logger"
-	"github.com/yujisoyama/go_microservices/pkg/protos/dbmanager"
+	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"
 	"github.com/yujisoyama/go_microservices/services/dbmanager/internal/interceptor"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

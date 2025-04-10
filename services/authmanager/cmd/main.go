@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	app := server.NewAuthManager()
-	err := app.Run(context.Background())
+	authManager := server.NewAuthManager()
+	err := authManager.Run(context.Background())
 	if err != nil {
 		panic(err)
 	}

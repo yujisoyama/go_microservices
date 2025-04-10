@@ -20,6 +20,11 @@ func AuthInterceptor(l *logger.Logger, apiKey string) grpc.UnaryServerIntercepto
 
 		// Obtém a chave "api-key" do metadata
 		reqKey := md.Get("api-key")
+		if len(reqKey) == 0 {
+			l.Errorf("Api key is missing")
+			return nil, status.Error(codes.Unauthenticated, "Api key is missing")
+		}
+
 		if apiKey != reqKey[0] {
 			l.Errorf("Invalid api key")
 			return nil, status.Error(codes.Unauthenticated, "Invalid api key")

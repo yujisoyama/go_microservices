@@ -11,13 +11,13 @@ type LoginService interface {
 
 type loginService struct {
 	log        *logger.Logger
-	repository *dbmanager.DbManagerClient
+	repository dbmanager.DbManagerClient
 }
 
-func NewLoginService(log *logger.Logger) LoginService {
+func NewLoginService(log *logger.Logger, repository dbmanager.DbManagerClient) LoginService {
 	return &loginService{
 		log:        log,
-		// repository: repository,
+		repository: repository,
 	}
 }
 

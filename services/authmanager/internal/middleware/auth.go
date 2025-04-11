@@ -8,19 +8,22 @@ import (
 	"github.com/yujisoyama/go_microservices/pkg/utils"
 )
 
+// create to define the oAuthTypes
+type OAuthType string
+
 const (
-	O_AUTH_TYPE  = "oAuthType"
-	GOOGLE_OAUTH = "GOOGLE_OAUTH"
-	GITHUB_OAUTH = "GITHUB_OAUTH"
+	O_AUTH_TYPE            = "oAuthType"
+	GOOGLE_OAUTH OAuthType = "GOOGLE_OAUTH"
+	GITHUB_OAUTH OAuthType = "GITHUB_OAUTH"
 )
 
 type AuthMiddleware struct {
-	apiKeys map[string]string
+	apiKeys map[string]OAuthType
 }
 
 func NewAuthMiddleware() *AuthMiddleware {
 	return &AuthMiddleware{
-		apiKeys: map[string]string{
+		apiKeys: map[string]OAuthType{
 			utils.GetEnv("GOOGLE_API_KEY"): GOOGLE_OAUTH,
 			utils.GetEnv("GITHUB_API_KEY"): GITHUB_OAUTH,
 		},

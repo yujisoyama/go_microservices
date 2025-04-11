@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/yujisoyama/go_microservices/pkg/utils"
+	"github.com/yujisoyama/go_microservices/services/authmanager/internal/middleware"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
-type GoogleConfig struct {
-	GoogleLoginConfig oauth2.Config
+type GoogleOAuthConfig struct {
+	OAuthConfig oauth2.Config
 }
 
-func GoogleConfigInit() oauth2.Config {
+func GoogleConfigInit() OAuthInterface {
 	googleConfig := oauth2.Config{
 		ClientID:     utils.GetEnv("GOOGLE_CLIENT_ID"),
 		ClientSecret: utils.GetEnv("GOOGLE_CLIENT_SECRET"),
@@ -22,5 +23,12 @@ func GoogleConfigInit() oauth2.Config {
 		Endpoint: google.Endpoint,
 	}
 
-	return googleConfig
+	return &GoogleOAuthConfig{
+		OAuthConfig: googleConfig,
+	}
+}
+
+func (g *GoogleOAuthConfig) OAuthLogin() string {
+	url := g.OAuthConfig.AuthCodeURL(string(middleware.GOOGLE_OAUTH))
+	return url
 }

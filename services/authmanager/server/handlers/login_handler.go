@@ -9,7 +9,7 @@ import (
 
 func Login(service services.LoginService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		oAuthType := c.Locals(middleware.O_AUTH_TYPE).(string)
+		oAuthType := c.Locals(middleware.O_AUTH_TYPE).(middleware.OAuthType)
 		url, err := service.Login(oAuthType)
 		if err != nil {
 			return utils.RestException(c, fiber.StatusNotImplemented, err.Error(), nil)
@@ -20,15 +20,15 @@ func Login(service services.LoginService) fiber.Handler {
 	}
 }
 
-func OAuthCallback(service services.LoginService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		state := c.Query("state")
-		code := c.Query("code")
-		userData, err := service.OAuthCallback(state, code)
-		if err != nil {
-			return utils.RestException(c, fiber.StatusInternalServerError, err.Error(), nil)
-		}
+// func OAuthCallback(service services.LoginService) fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		state := c.Query("state")
+// 		code := c.Query("code")
+// 		userData, err := service.OAuthCallback(state, code)
+// 		if err != nil {
+// 			return utils.RestException(c, fiber.StatusInternalServerError, err.Error(), nil)
+// 		}
 
-		return c.SendString(string(userData))
-	}
-}
+// 		return c.SendString(string(userData))
+// 	}
+// }

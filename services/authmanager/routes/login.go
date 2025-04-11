@@ -7,5 +7,6 @@ import (
 )
 
 func LoginRouter(app fiber.Router, service services.LoginService) {
-	app.Post("/login", handlers.Login(service))
+	app.Get("/login", handlers.Login(service))
+	app.Get("/oauth-callback", handlers.OAuthCallback(service))
 }

@@ -12,7 +12,7 @@ import (
 )
 
 func UpsertUser(ctx context.Context, dbClient *mongo.Client, req *dbmanager.UpsertUserRequest) (*dbmanager.UpsertUserResponse, error) {
-	newUser := dto.InputDtoUserToEntity(req)
+	newUser := dbmanagerdto.InputDtoUserToEntity(req)
 	updatedUser, err := repository.UpsertUser(ctx, dbClient, newUser)
 	if err != nil {
 		return nil, err

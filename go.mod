@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/sirupsen/logrus v1.9.3
 	go.mongodb.org/mongo-driver v1.17.3
 	golang.org/x/oauth2 v0.25.0

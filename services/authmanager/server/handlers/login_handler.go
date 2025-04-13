@@ -3,7 +3,9 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/yujisoyama/go_microservices/pkg/utils"
+	"github.com/yujisoyama/go_microservices/services/authmanager/internal/jwt"
 	"github.com/yujisoyama/go_microservices/services/authmanager/internal/middleware"
+	authmanagerdto "github.com/yujisoyama/go_microservices/services/authmanager/server/dto"
 	"github.com/yujisoyama/go_microservices/services/authmanager/server/services"
 )
 
@@ -29,6 +31,17 @@ func OAuthCallback(service services.LoginService) fiber.Handler {
 			return utils.RestException(c, httpCode, err.Error(), nil)
 		}
 
-		return c.SendString(string(userData))
+		return c.Status(httpCode).JSON(userData)
+	}
+}
+
+func Me(service services.LoginService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		tokenInfo := c.Locals(middleware.TOKEN_INFO).(*jwt.TokenInfo)
+		resp := authmanagerdto.MeOutputDto{
+			UserId:  tokenInfo.UserId,
+			OAuthId: tokenInfo.OAuthId,
+		}
+		return c.Status(fiber.StatusOK).JSON(resp)
 	}
 }

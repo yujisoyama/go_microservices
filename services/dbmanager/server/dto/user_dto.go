@@ -1,4 +1,4 @@
-package dto
+package dbmanagerdto
 
 import (
 	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"

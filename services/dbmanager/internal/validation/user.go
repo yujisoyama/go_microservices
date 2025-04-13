@@ -7,10 +7,7 @@ import (
 )
 
 func ValidateUpsertUserRequest(req *dbmanager.UpsertUserRequest) error {
-	if len(req.Name) == 0 {
-		return errors.New("name is required")
-	}
-	if len(req.Email) == 0 {
+	if len(req.User.Email) == 0 {
 		return errors.New("email is required")
 	}
 	return nil

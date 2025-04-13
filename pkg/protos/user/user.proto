@@ -4,9 +4,14 @@ option go_package = "github.com/yujisoyama/go_microservices/pkg/pb/user";
 
 message User {
   string id = 1;
-  string name = 2;
-  string email = 3;
-  string created_at = 4;
-  string updated_at = 5;
-  string deleted_at = 6;
+  string oauth_id = 2;
+  string oauth_type = 3;
+  string email = 4;
+  bool verified_email = 5;
+  string first_name = 6;
+  string last_name = 7;
+  string picture = 8;
+  string created_at = 9;
+  string updated_at = 10;
+  string deleted_at = 11;
 }

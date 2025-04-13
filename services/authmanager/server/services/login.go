@@ -1,10 +1,8 @@
 package services
 
 import (
-	// "context"
-	// "fmt"
-	// "io"
-	// "net/http"
+	"context"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yujisoyama/go_microservices/pkg/logger"
@@ -14,8 +12,8 @@ import (
 )
 
 type LoginService interface {
-	Login(oAuthType middleware.OAuthType) (string, error)
-	// OAuthCallback(oAuthType string, code string) ([]byte, error)
+	Login(oAuthType middleware.OAuthType) (string, int, error)
+	LoginCallback(oAuthType middleware.OAuthType, code string) ([]byte, int, error)
 }
 
 type loginService struct {
@@ -37,39 +35,35 @@ func NewLoginService(log *logger.Logger, repository dbmanager.DbManagerClient) L
 	}
 }
 
-func (ls *loginService) Login(oAuthType middleware.OAuthType) (string, error) {
+func (ls *loginService) Login(oAuthType middleware.OAuthType) (string, int, error) {
 	ls.log.Info("Login with ", oAuthType)
 	oAuthConfig, exists := ls.oAuthConfigs[oAuthType]
 	if !exists {
-		return "", fiber.ErrNotImplemented
+		return "", fiber.StatusNotImplemented, fmt.Errorf("oAuthType: %s not found", oAuthType)
 	}
 
 	url := oAuthConfig.OAuthLogin()
-	return url, nil
+	return url, fiber.StatusOK, nil
 }
 
-// func (ls *loginService) OAuthCallback(oAuthType string, code string) ([]byte, error) {
-// 	ls.log.Info("OAuthCallback with ", oAuthType)
-// 	switch oAuthType {
-// 	case middleware.GOOGLE_OAUTH:
-// 		// ver uma maneira de colocar esse bloco ed código em outra função através de interfaces
-// 		googleConfig := oauth.GoogleConfigInit()
-// 		token, err := googleConfig.Exchange(context.Background(), code)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("Failed to exchange code for token: %v", err)
-// 		}
-// 		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("Failed to get userinfo: %v", err)
-// 		}
+func (ls *loginService) LoginCallback(oAuthType middleware.OAuthType, code string) ([]byte, int, error) {
+	ls.log.Info("OAuthCallback with ", oAuthType)
+	oAuthConfig, exists := ls.oAuthConfigs[oAuthType]
+	if !exists {
+		return nil, fiber.StatusNotImplemented, fmt.Errorf("oAuthType: %s not found", oAuthType)
+	}
 
-// 		userData, err := io.ReadAll(resp.Body)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("JSON Parsing Failed: %v", err)
-// 		}
+	user, err := oAuthConfig.OAuthCallback(code)
+	if err != nil {
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("Error in OAuthCallback: %v", err)
+	}
 
-// 		return userData, nil
-// 	default:
-// 		return nil, fmt.Errorf("Unimplemented oAuthType: %s", oAuthType)
-// 	}
-// }
+	_, err = ls.repository.UpsertUser(context.Background(), &dbmanager.UpsertUserRequest{
+		User: user,
+	})
+	if err != nil {
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("Error in UpsertUser: %v", err)
+	}
+
+	return nil, fiber.StatusOK, nil
+}

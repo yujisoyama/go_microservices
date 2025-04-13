@@ -13,8 +13,7 @@ message PingRequest {}
 message PingResponse {}
 
 message UpsertUserRequest {
-  string email = 1;
-  string name = 2;
+  user.User user = 1;
 }
 
 message UpsertUserResponse {

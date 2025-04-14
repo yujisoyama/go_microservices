@@ -5,14 +5,13 @@ import (
 	"github.com/yujisoyama/go_microservices/pkg/utils"
 	"github.com/yujisoyama/go_microservices/services/authmanager/internal/jwt"
 	"github.com/yujisoyama/go_microservices/services/authmanager/internal/middleware"
-	authmanagerdto "github.com/yujisoyama/go_microservices/services/authmanager/server/dto"
 	"github.com/yujisoyama/go_microservices/services/authmanager/server/services"
 )
 
-func Login(service services.LoginService) fiber.Handler {
+func OAuthLogin(service services.LoginService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		oAuthType := c.Locals(middleware.O_AUTH_TYPE).(middleware.OAuthType)
-		url, code, err := service.Login(oAuthType)
+		url, code, err := service.OAuthLogin(oAuthType)
 		if err != nil {
 			return utils.RestException(c, code, err.Error(), nil)
 		}
@@ -26,7 +25,7 @@ func OAuthCallback(service services.LoginService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		state := c.Query("state")
 		code := c.Query("code")
-		userData, httpCode, err := service.LoginCallback(middleware.OAuthType(state), code)
+		userData, httpCode, err := service.OAuthLoginCallback(middleware.OAuthType(state), code)
 		if err != nil {
 			return utils.RestException(c, httpCode, err.Error(), nil)
 		}
@@ -38,10 +37,12 @@ func OAuthCallback(service services.LoginService) fiber.Handler {
 func Me(service services.LoginService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		tokenInfo := c.Locals(middleware.TOKEN_INFO).(*jwt.TokenInfo)
-		resp := authmanagerdto.MeOutputDto{
-			UserId:  tokenInfo.UserId,
-			OAuthId: tokenInfo.OAuthId,
+		token := c.Locals(middleware.ACCESS_TOKEN).(string)
+		user, code, err := service.Me(token, *tokenInfo)
+		if err != nil {
+			return utils.RestException(c, code, err.Error(), nil)
 		}
-		return c.Status(fiber.StatusOK).JSON(resp)
+
+		return c.Status(fiber.StatusOK).JSON(user)
 	}
 }

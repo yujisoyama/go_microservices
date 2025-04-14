@@ -29,7 +29,7 @@ func UpsertUser(ctx context.Context, dbClient *mongo.Client, newUser *entity.Use
 		collection := dbClient.Database(DB).Collection(COLLECTION)
 
 		var usr entity.UserEntity
-		err = collection.FindOne(ctx, bson.M{"email": newUser.Email}).Decode(&usr)
+		err = collection.FindOne(ctx, bson.M{"oauth_id": newUser.OauthId}).Decode(&usr)
 		if err == mongo.ErrNoDocuments {
 			newUser.CreatedAt = time.Now()
 			newUser.UpdatedAt = time.Now()
@@ -46,6 +46,7 @@ func UpsertUser(ctx context.Context, dbClient *mongo.Client, newUser *entity.Use
 			newUser.ID = oId
 			resp = newUser
 		} else {
+			newUser.CreatedAt = usr.CreatedAt
 			newUser.UpdatedAt = time.Now()
 			update := bson.M{
 				"$set": newUser,
@@ -68,4 +69,20 @@ func UpsertUser(ctx context.Context, dbClient *mongo.Client, newUser *entity.Use
 	}
 
 	return resp, nil
+}
+
+func GetUserById(ctx context.Context, dbClient *mongo.Client, id string) (*entity.UserEntity, error) {
+	collection := dbClient.Database(DB).Collection(COLLECTION)
+	oId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("User id is not a valid ObjectID: %v", err)
+	}
+
+	var usr entity.UserEntity
+	err = collection.FindOne(ctx, bson.M{"_id": oId}).Decode(&usr)
+	if err == mongo.ErrNoDocuments {
+		return nil, fmt.Errorf("User not found: %v", err)
+	}
+
+	return &usr, nil
 }

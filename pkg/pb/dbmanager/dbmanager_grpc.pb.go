@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type DbManagerClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 	UpsertUser(ctx context.Context, in *UpsertUserRequest, opts ...grpc.CallOption) (*UpsertUserResponse, error)
+	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
 }
 
 type dbManagerClient struct {
@@ -47,12 +48,22 @@ func (c *dbManagerClient) UpsertUser(ctx context.Context, in *UpsertUserRequest,
 	return out, nil
 }
 
+func (c *dbManagerClient) GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error) {
+	out := new(GetUserByIdResponse)
+	err := c.cc.Invoke(ctx, "/dbmanager.DbManager/GetUserById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DbManagerServer is the server API for DbManager service.
 // All implementations must embed UnimplementedDbManagerServer
 // for forward compatibility
 type DbManagerServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	UpsertUser(context.Context, *UpsertUserRequest) (*UpsertUserResponse, error)
+	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
 	mustEmbedUnimplementedDbManagerServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedDbManagerServer) Ping(context.Context, *PingRequest) (*PingRe
 }
 func (UnimplementedDbManagerServer) UpsertUser(context.Context, *UpsertUserRequest) (*UpsertUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertUser not implemented")
+}
+func (UnimplementedDbManagerServer) GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
 }
 func (UnimplementedDbManagerServer) mustEmbedUnimplementedDbManagerServer() {}
 
@@ -115,6 +129,24 @@ func _DbManager_UpsertUser_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DbManager_GetUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DbManagerServer).GetUserById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/dbmanager.DbManager/GetUserById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DbManagerServer).GetUserById(ctx, req.(*GetUserByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _DbManager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "dbmanager.DbManager",
 	HandlerType: (*DbManagerServer)(nil),
@@ -126,6 +158,10 @@ var _DbManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpsertUser",
 			Handler:    _DbManager_UpsertUser_Handler,
+		},
+		{
+			MethodName: "GetUserById",
+			Handler:    _DbManager_GetUserById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -34,3 +34,27 @@ func UpsertUser(ctx context.Context, dbClient *mongo.Client, req *dbmanager.Upse
 	}
 	return resp, nil
 }
+
+func GetUserById(ctx context.Context, dbClient *mongo.Client, req *dbmanager.GetUserByIdRequest) (*dbmanager.GetUserByIdResponse, error) {
+	getUser, err := repository.GetUserById(ctx, dbClient, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &dbmanager.GetUserByIdResponse{
+		User: &user.User{
+			Id:            getUser.ID.Hex(),
+			OauthId:       getUser.OauthId,
+			OauthType:     getUser.OauthType,
+			Email:         getUser.Email,
+			VerifiedEmail: getUser.VerifiedEmail,
+			FirstName:     getUser.FirstName,
+			LastName:      getUser.LastName,
+			Picture:       getUser.Picture,
+			CreatedAt:     getUser.CreatedAt.UTC().Format(time.RFC3339),
+			UpdatedAt:     getUser.UpdatedAt.UTC().Format(time.RFC3339),
+		},
+	}
+
+	return resp, nil
+}

@@ -14,8 +14,9 @@ import (
 type OAuthType string
 
 const (
-	TOKEN_INFO             = "tokenInfo"
 	O_AUTH_TYPE            = "oAuthType"
+	ACCESS_TOKEN           = "accessToken"
+	TOKEN_INFO             = "tokenInfo"
 	GOOGLE_OAUTH OAuthType = "GOOGLE_OAUTH"
 	GITHUB_OAUTH OAuthType = "GITHUB_OAUTH"
 )
@@ -60,7 +61,7 @@ func (am *AuthMiddleware) CheckAuth() fiber.Handler {
 			return utils.RestException(c, fiber.StatusUnauthorized, err.Error(), nil)
 		}
 
-		fmt.Println(tokenInfo)
+		c.Locals(ACCESS_TOKEN, token)
 		c.Locals(TOKEN_INFO, tokenInfo)
 		return c.Next()
 	}

@@ -15,8 +15,17 @@ func (dbm *DbManager) UpsertUser(ctx context.Context, req *dbmanager.UpsertUserR
 	if err != nil {
 		return nil, utils.GrpcException(codes.InvalidArgument, err.Error())
 	}
-	
+
 	resp, err := handler.UpsertUser(ctx, dbm.dbClient, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (dbm *DbManager) GetUserById(ctx context.Context, req *dbmanager.GetUserByIdRequest) (*dbmanager.GetUserByIdResponse, error) {
+	resp, err := handler.GetUserById(ctx, dbm.dbClient, req)
 	if err != nil {
 		return nil, err
 	}

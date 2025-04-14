@@ -7,6 +7,7 @@ import "pkg/protos/user/user.proto";
 service DbManager {
   rpc Ping(PingRequest) returns (PingResponse);
   rpc UpsertUser(UpsertUserRequest) returns (UpsertUserResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
 }
 
 message PingRequest {}
@@ -17,5 +18,13 @@ message UpsertUserRequest {
 }
 
 message UpsertUserResponse {
+  user.User user = 1;
+}
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUserByIdResponse {
   user.User user = 1;
 }

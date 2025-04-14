@@ -7,15 +7,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/yujisoyama/go_microservices/pkg/logger"
 	"github.com/yujisoyama/go_microservices/pkg/pb/dbmanager"
+	"github.com/yujisoyama/go_microservices/services/authmanager/internal/jwt"
 	"github.com/yujisoyama/go_microservices/services/authmanager/internal/middleware"
 	"github.com/yujisoyama/go_microservices/services/authmanager/internal/oauth"
-	"github.com/yujisoyama/go_microservices/services/authmanager/internal/jwt"
 	authmanagerdto "github.com/yujisoyama/go_microservices/services/authmanager/server/dto"
 )
 
 type LoginService interface {
-	Login(oAuthType middleware.OAuthType) (string, int, error)
-	LoginCallback(oAuthType middleware.OAuthType, code string) (*authmanagerdto.OAuthLoginOutputDto, int, error)
+	OAuthLogin(oAuthType middleware.OAuthType) (string, int, error)
+	OAuthLoginCallback(oAuthType middleware.OAuthType, code string) (*authmanagerdto.OAuthLoginOutputDto, int, error)
+	Me(accessToken string, tokenInfo jwt.TokenInfo) (*authmanagerdto.MeOutputDto, int, error)
 }
 
 type loginService struct {
@@ -39,8 +40,8 @@ func NewLoginService(log *logger.Logger, repository dbmanager.DbManagerClient) L
 	}
 }
 
-func (ls *loginService) Login(oAuthType middleware.OAuthType) (string, int, error) {
-	ls.log.Info("Login with ", oAuthType)
+func (ls *loginService) OAuthLogin(oAuthType middleware.OAuthType) (string, int, error) {
+	ls.log.Info("OAuthLogin with ", oAuthType)
 	oAuthConfig, exists := ls.oAuthConfigs[oAuthType]
 	if !exists {
 		return "", fiber.StatusNotImplemented, fmt.Errorf("oAuthType: %s not found", oAuthType)
@@ -50,8 +51,8 @@ func (ls *loginService) Login(oAuthType middleware.OAuthType) (string, int, erro
 	return url, fiber.StatusOK, nil
 }
 
-func (ls *loginService) LoginCallback(oAuthType middleware.OAuthType, code string) (*authmanagerdto.OAuthLoginOutputDto, int, error) {
-	ls.log.Info("OAuthCallback with ", oAuthType)
+func (ls *loginService) OAuthLoginCallback(oAuthType middleware.OAuthType, code string) (*authmanagerdto.OAuthLoginOutputDto, int, error) {
+	ls.log.Info("OAuthLoginCallback with ", oAuthType)
 	oAuthConfig, exists := ls.oAuthConfigs[oAuthType]
 	if !exists {
 		return nil, fiber.StatusNotImplemented, fmt.Errorf("oAuthType: %s not found", oAuthType)
@@ -82,4 +83,28 @@ func (ls *loginService) LoginCallback(oAuthType middleware.OAuthType, code strin
 	}
 
 	return resp, fiber.StatusOK, nil
+}
+
+func (ls *loginService) Me(accessToken string, tokenInfo jwt.TokenInfo) (*authmanagerdto.MeOutputDto, int, error) {
+	ls.log.Info("Get my information with id ", tokenInfo.UserId)
+	resp, err := ls.repository.GetUserById(context.Background(), &dbmanager.GetUserByIdRequest{
+		Id: tokenInfo.UserId,
+	})
+	if err != nil {
+		return nil, fiber.StatusInternalServerError, fmt.Errorf("Error in GetUserById: %v", err)
+	}
+
+	user := &authmanagerdto.MeOutputDto{
+		AccessToken:   accessToken,
+		Id:            resp.User.Id,
+		OauthId:       resp.User.OauthId,
+		OauthtType:    resp.User.OauthType,
+		Email:         resp.User.Email,
+		VerifiedEmail: resp.User.VerifiedEmail,
+		FirstName:     resp.User.FirstName,
+		LastName:      resp.User.LastName,
+		Picture:       resp.User.Picture,
+	}
+
+	return user, fiber.StatusOK, nil
 }

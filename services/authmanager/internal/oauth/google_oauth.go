@@ -43,7 +43,7 @@ type GoogleUser struct {
 	Picture       string `json:"picture"`
 }
 
-func (googleUser *GoogleUser) ParseToEntity() *user.User {
+func (googleUser *GoogleUser) ParseToUserPb() *user.User {
 	return &user.User{
 		OauthId:       googleUser.Id,
 		OauthType:     string(middleware.GOOGLE_OAUTH),
@@ -56,7 +56,7 @@ func (googleUser *GoogleUser) ParseToEntity() *user.User {
 }
 
 func (g *GoogleOAuthConfig) OAuthLogin() string {
-	url := g.OAuthConfig.AuthCodeURL(string(middleware.GOOGLE_OAUTH))
+	url := g.OAuthConfig.AuthCodeURL(string(middleware.GOOGLE_OAUTH), oauth2.SetAuthURLParam("prompt", "consent select_account"))
 	return url
 }
 
@@ -80,6 +80,6 @@ func (g *GoogleOAuthConfig) OAuthCallback(code string) (*user.User, error) {
 		return nil, fmt.Errorf("Failed to unmarshal GoogleUser: %v", err)
 	}
 
-	user := googleUser.ParseToEntity()
+	user := googleUser.ParseToUserPb()
 	return user, nil
 }

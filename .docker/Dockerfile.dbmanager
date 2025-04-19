@@ -1,0 +1,26 @@
+# Build
+FROM golang:1.24-alpine AS builder
+
+# Define working directory inside container
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+# Copy the pkg folder
+COPY ./pkg ./pkg
+
+# Copy the dbmanager code
+COPY ./services/dbmanager ./services/dbmanager
+
+WORKDIR /app/services/dbmanager
+
+# Build the DBManager
+RUN go build -o ./dbmanager ./cmd/main.go
+
+EXPOSE 6000
+
+ENTRYPOINT [ "./dbmanager" ]

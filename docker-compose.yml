@@ -7,3 +7,15 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - 27017:27017
+
+  dbmanager:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.dbmanager
+    env_file: ./services/dbmanager/.env
+    environment:
+      - DB_HOST=mongodb
+    ports:
+      - 6000:6000
+    depends_on:
+      - mongodb

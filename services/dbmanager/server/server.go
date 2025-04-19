@@ -32,7 +32,7 @@ func NewDbManager() *DbManager {
 
 func (dbm *DbManager) Run(ctx context.Context) error {
 	dbm.SetConfigs()
-	dbm.log.Info("Start grpc dbmanager in port: ", dbm.configs.port)
+	dbm.log.Info("Starting grpc dbmanager in port: ", dbm.configs.port)
 
 	clientOptions := options.Client().ApplyURI(dbm.DbConnectString())
 

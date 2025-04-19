@@ -1,0 +1,26 @@
+# Build
+FROM golang:1.24-alpine AS builder
+
+# Define working directory inside container
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+# Copy the pkg folder
+COPY ./pkg ./pkg
+
+# Copy the authmanager code
+COPY ./services/authmanager ./services/authmanager
+
+WORKDIR /app/services/authmanager
+
+# Build the AuthManager
+RUN go build -o ./authmanager ./cmd/main.go
+
+EXPOSE 6001
+
+ENTRYPOINT [ "./authmanager" ]

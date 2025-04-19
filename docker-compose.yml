@@ -19,3 +19,15 @@ services:
       - 6000:6000
     depends_on:
       - mongodb
+
+  authmanager:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.authmanager
+    env_file: ./services/authmanager/.env
+    environment:
+      - DBM_HOST=dbmanager:6000
+    ports:
+      - 6001:6001
+    depends_on:
+      - dbmanager

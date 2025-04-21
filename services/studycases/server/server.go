@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yujisoyama/go_microservices/pkg/logger"
+	"github.com/yujisoyama/go_microservices/services/studycases/internal/middleware"
 	"github.com/yujisoyama/go_microservices/services/studycases/routes"
 	"github.com/yujisoyama/go_microservices/services/studycases/server/services"
 )
@@ -30,9 +31,10 @@ func (sc *StudyCases) Run(ctx context.Context) error {
 	sc.app = fiber.New(fiber.Config{
 		AppName: "StudyCases",
 	})
+	authMiddleware := middleware.NewAuthMiddleware()
+	sc.app.Use(authMiddleware.CheckAuth())
 
 	paralellismService := services.NewParallelismService(sc.log)
-
 	routes.ParallelismRouter(sc.app, paralellismService)
 
 	return sc.app.Listen(fmt.Sprintf(":%s", sc.configs.port))

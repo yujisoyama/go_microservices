@@ -40,13 +40,16 @@ func NewAuthMiddleware() *AuthMiddleware {
 
 func (am *AuthMiddleware) CheckAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		am.log.Info("Checking auth")
 		auth := c.Get(headers.Authorization)
 		if len(auth) < 1 {
+			am.log.Error("Missing token")
 			return utils.RestException(c, fiber.StatusUnauthorized, "Missing token", nil)
 		}
 
 		var token string
 		if _, err := fmt.Sscanf(auth, "Bearer %s", &token); err != nil {
+			am.log.Error("Invalid auth format")
 			utils.RestException(c, fiber.StatusUnauthorized, "Invalid Authorization format", nil)
 		}
 
@@ -58,6 +61,7 @@ func (am *AuthMiddleware) CheckAuth() fiber.Handler {
 
 		tokenInfo, err := am.jwtService.VerifyToken(token)
 		if err != nil {
+			am.log.Error("Invalid token")
 			return utils.RestException(c, fiber.StatusUnauthorized, err.Error(), nil)
 		}
 

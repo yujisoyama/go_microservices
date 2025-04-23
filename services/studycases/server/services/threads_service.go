@@ -1,6 +1,7 @@
 package services
 
 import (
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -203,6 +204,24 @@ func channelWithMultipleWorkers(log *logger.Logger) string {
 	return "Channel with worker"
 }
 
+func waitGroupWorker(log *logger.Logger, id int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	log.Infof("Worker %d", id)
+	time.Sleep(1 * time.Second)
+}
+
+func testWaitGroup(log *logger.Logger) string {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go waitGroupWorker(log, 1, &wg)
+	go waitGroupWorker(log, 2, &wg)
+
+	wg.Wait()
+	// é aguardado as go routines finalizarem
+	return "WaitGroup"
+}
+
 func (ts *threadsService) TestThreads(test string) (string, int, error) {
 	ts.log.Info("---------------- Threads Test ----------------")
 
@@ -230,6 +249,8 @@ func (ts *threadsService) TestThreads(test string) (string, int, error) {
 		return channelWithWorker(ts.log), fiber.StatusOK, nil
 	case "9":
 		return channelWithMultipleWorkers(ts.log), fiber.StatusOK, nil
+	case "10":
+		return testWaitGroup(ts.log), fiber.StatusOK, nil
 	default:
 		return "", fiber.StatusOK, nil
 	}

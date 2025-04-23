@@ -17,7 +17,7 @@ type JWTService struct {
 func NewJWTConfigs() *JWTService {
 	return &JWTService{
 		SecretKey: []byte(utils.GetEnv("JWT_SECRET_KEY")),
-		ExpTime:   time.Now().Add(1 * time.Hour).Unix(),
+		ExpTime:   time.Now().Add(5 * time.Hour).Unix(),
 		IatTime:   time.Now().Unix(),
 	}
 }

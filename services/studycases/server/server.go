@@ -34,8 +34,8 @@ func (sc *StudyCases) Run(ctx context.Context) error {
 	authMiddleware := middleware.NewAuthMiddleware()
 	sc.app.Use(authMiddleware.CheckAuth())
 
-	paralellismService := services.NewParallelismService(sc.log)
-	routes.ParallelismRouter(sc.app, paralellismService)
+	threadsService := services.NewThreadsService(sc.log)
+	routes.ThreadRouter(sc.app, threadsService)
 
 	return sc.app.Listen(fmt.Sprintf(":%s", sc.configs.port))
 }

@@ -32,6 +32,7 @@ func NewAuthMiddleware() *AuthMiddleware {
 
 func (am *AuthMiddleware) CheckAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		am.log.Info("Checking auth")
 		auth := c.Get(headers.Authorization)
 		if len(auth) < 1 {
 			return utils.RestException(c, fiber.StatusUnauthorized, "Missing token", nil)

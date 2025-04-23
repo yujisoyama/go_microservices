@@ -6,6 +6,6 @@ import (
 	"github.com/yujisoyama/go_microservices/services/studycases/server/services"
 )
 
-func ParallelismRouter(app fiber.Router, service services.ParallelismService) {
-	app.Get("/parallelism-test", handlers.Test(service))
+func ThreadRouter(app fiber.Router, service services.ThreadsService) {
+	app.Get("/thread-tests/:testCase", handlers.Test(service))
 }

@@ -6,12 +6,13 @@ import (
 	"github.com/yujisoyama/go_microservices/services/studycases/server/services"
 )
 
-func Test(service services.ParallelismService) fiber.Handler {
+func Test(service services.ThreadsService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		code, err := service.Test()
+		testCase := c.Params("testCase")
+		t, code, err := service.TestThreads(testCase)
 		if err != nil {
 			return utils.RestException(c, code, err.Error(), nil)
 		}
-		return c.SendStatus(fiber.StatusNoContent)
+		return c.Status(code).SendString(t)
 	}
 }
